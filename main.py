@@ -7,6 +7,7 @@ from ocr import OCRTools
 from tools import Tools
 from office import OfficeTools
 from log import Log
+import cv2
 
 cacheDir = Tools.getCacheDir()
 docxDir = Tools.getDocxDir()
@@ -42,33 +43,36 @@ docxFiles = (
     '../多湖街道/驿头村股东清册修改前.docx', """
 )
 
+def doJob(i):
+    docxFilePath = docxFiles[i]
+    name = Tools.getFileName(docxFilePath)
+    cDir = Tools.joinPath(cacheDir, str(i))
+    Tools.createDir(cDir)
+    officeTools = OfficeTools(cDir)
+    picPaths, picDir = officeTools.extractPics(docxFilePath)
+    fragDir = Tools.joinPath(cDir, 'fragment')
+    Tools.createDir(fragDir)
+    r = []
+    leng = len(picPaths)
+    leng = 1 # TODO
+    for j in range(leng):
+        picPath = picPaths[j]
+        childFragDir = Tools.joinPath(fragDir, str(j))
+        Tools.createDir(childFragDir)
+        ocr = OCRTools(childFragDir)
+        tr = ocr.ocr(picPath)
+        r += tr
+
+    excelPath = Tools.joinPath(cDir, '{}.xlsx'.format(name))
+    OfficeTools.writeIntoExcel(r, excelPath)
+    shutil.copyfile(excelPath, Tools.joinPath(excelDir, '{}.xlsx'.format(name)))
+
 for i in range(len(docxFiles)):
     try:
-        
-        docxFilePath = docxFiles[i]
-        name = Tools.getFileName(docxFilePath)
-        cDir = Tools.joinPath(cacheDir, str(i))
-        Tools.createDir(cDir)
-        officeTools = OfficeTools(cDir)
-        picPaths, picDir = officeTools.extractPics(docxFilePath)
-        fragDir = Tools.joinPath(cDir, 'fragment')
-        Tools.createDir(fragDir)
-        r = []
-        leng = len(picPaths)
-        leng = 1 
-        for j in range(leng):
-            picPath = picPaths[j]
-            childFragDir = Tools.joinPath(fragDir, str(j))
-            Tools.createDir(childFragDir)
-            ocr = OCRTools(childFragDir)
-            tr = ocr.ocr(picPath)
-            r += tr
-
-        excelPath = Tools.joinPath(cDir, '{}.xlsx'.format(name))
-        OfficeTools.writeIntoExcel(r, excelPath)
-        shutil.copyfile(excelPath, Tools.joinPath(excelDir, '{}.xlsx'.format(name)))
+        doJob(i)
     except Exception as e:
         Log.e(str(e))
+
 
 
 
