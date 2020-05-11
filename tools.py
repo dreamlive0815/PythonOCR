@@ -12,6 +12,14 @@ class Tools():
         return '../多湖街道'
 
     @classmethod
+    def getLogDir(cls):
+        return './log'
+
+    @classmethod
+    def getExcelDir(cls):
+        return './excel'
+
+    @classmethod
     def createDir(cls, dirPath):
         dirPath = dirPath.strip()
         dirPath = dirPath.rstrip("\\")

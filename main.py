@@ -8,10 +8,20 @@ from tools import Tools
 from office import OfficeTools
 from log import Log
 import cv2
+import re
+import _thread
+
+threadCount = 3
+
+
+docxDir = Tools.getDocxDir()
 
 cacheDir = Tools.getCacheDir()
-docxDir = Tools.getDocxDir()
-excelDir = './excel'
+Tools.createDir(cacheDir)
+excelDir = Tools.getExcelDir()
+Tools.createDir(excelDir)
+logDir = Tools.getLogDir()
+Tools.createDir(logDir)
 
 """ for f in os.listdir(docxDir):
     if f.endswith('.docx'):
@@ -19,7 +29,7 @@ excelDir = './excel'
 
 docxFiles = (
     '../多湖街道/七里畈股东清册.docx',
-    """ '../多湖街道/上古井村股东清册.docx',
+    '../多湖街道/上古井村股东清册.docx',
     '../多湖街道/下渎口村股东清册.docx',
     '../多湖街道/东湄社区股权清册.docx',
     '../多湖街道/东盛村股东清册.docx',
@@ -40,7 +50,7 @@ docxFiles = (
     '../多湖街道/近宅股东名单.docx',
     '../多湖街道/雅地村股东清册.docx',
     '../多湖街道/驿头村股东清册.docx',
-    '../多湖街道/驿头村股东清册修改前.docx', """
+    '../多湖街道/驿头村股东清册修改前.docx',
 )
 
 def doJob(i):
@@ -54,7 +64,7 @@ def doJob(i):
     Tools.createDir(fragDir)
     r = []
     leng = len(picPaths)
-    leng = 1 # TODO
+    # leng = 1 # TODO
     for j in range(leng):
         picPath = picPaths[j]
         childFragDir = Tools.joinPath(fragDir, str(j))
@@ -67,11 +77,39 @@ def doJob(i):
     OfficeTools.writeIntoExcel(r, excelPath)
     shutil.copyfile(excelPath, Tools.joinPath(excelDir, '{}.xlsx'.format(name)))
 
-for i in range(len(docxFiles)):
+
+def doJobs(name, tindex):
+    docxCount = len(docxFiles)
+
+    jobi = tindex
+    while jobi < docxCount:
+        try:
+            doJob(jobi)
+        except Exception as e:
+            Log.e(str(e))
+        jobi += threadCount
+
+
+def startThread(tindex):
     try:
-        doJob(i)
+        _thread.start_new_thread(doJobs, ('Thread{}'.format(tindex + 1), tindex))
     except Exception as e:
         Log.e(str(e))
+
+for i in range(threadCount):
+    startThread(i)
+
+
+
+input('任意键结束')
+
+# for i in range(len(docxFiles)):
+#     # doJob(i)
+#     try:
+#         # doJob(i)
+#         pass
+#     except Exception as e:
+#         Log.e(str(e))
 
 
 

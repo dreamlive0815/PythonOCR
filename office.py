@@ -4,7 +4,6 @@ import shutil
 import zipfile
 import re
 import functools
-from docx import Document
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
 from openpyxl.styles import Border, Side, colors
@@ -67,7 +66,7 @@ class OfficeTools():
         book = Workbook()
         sheet = book.active
         
-        sheet.column_dimensions['E'].width = 32.0
+        # sheet.column_dimensions['E'].width = 32.0
 
         border = Border(left = Side(style = 'thin', color = colors.BLACK),
                         right = Side(style = 'thin', color = colors.BLACK),
@@ -77,22 +76,18 @@ class OfficeTools():
         leftAlign = Alignment(horizontal = 'left', vertical = 'center')
         centerAlign = Alignment(horizontal = 'center', vertical = 'center')
 
-        headers = ('户编号', '户主（与户主关系）', '', '性别', '身份证号', '人持股数', '合计人数', '合计股数', '备注')
-        sheet.merge_cells('B3:C3')
-        for i in range(len(headers)):
-            cell = sheet.cell(row = 3, column = i + 1)
-            cell.border = border
-            if i == 2:
-                continue
-            cell.value = headers[i]
-            cell.alignment = centerAlign
-            
+        # headers = ('户编号', '户主（与户主关系）', '', '性别', '身份证号', '人持股数', '合计人数', '合计股数', '备注')
+        # sheet.merge_cells('B3:C3')
+        # for i in range(len(headers)):
+        #     cell = sheet.cell(row = 3, column = i + 1)
+        #     cell.border = border
+        #     if i == 2:
+        #         continue
+        #     cell.value = headers[i]
+        #     cell.alignment = centerAlign
 
-        aligns = []
-        for i in range(9):
-            aligns.append(centerAlign)
-        aligns[1] = leftAlign
-        aligns[2] = leftAlign
+        def getCellAlign(cidx):
+            return centerAlign
         
         startRow = 4
         for i in range(len(r)):
@@ -103,7 +98,7 @@ class OfficeTools():
                 cidx = j + 1
                 cell = sheet.cell(row = ridx, column = cidx)
                 cell.value = txt
-                cell.alignment = aligns[j]
+                cell.alignment = getCellAlign(j)
                 cell.border = border
         book.save(excelFilePath)
 
