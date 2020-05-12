@@ -37,6 +37,7 @@ class OfficeTools():
         zipF.close()
 
         imgStoreDir = Tools.joinPath(cacheDir, 'images')
+        shutil.rmtree(imgStoreDir, ignore_errors=True)
         Tools.createDir(imgStoreDir)
         mediaDir = Tools.joinPath(extractDir, 'word', 'media')
         r = []

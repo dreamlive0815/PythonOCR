@@ -27,7 +27,7 @@ Tools.createDir(logDir)
         print("    '" + Tools.joinPath(docxDir, f) + "',") """
 
 docxFiles = (
-    # '../多湖街道/七里畈股东清册.docx',
+    #'../多湖街道/七里畈股东清册.docx',
     # '../多湖街道/上古井村股东清册.docx',
     # '../多湖街道/下渎口村股东清册.docx',
     # '../多湖街道/东湄社区股权清册.docx',
@@ -80,6 +80,40 @@ def doJob(i):
     OfficeTools.writeIntoExcel(r, excelPath)
     shutil.copyfile(excelPath, Tools.joinPath(excelDir, '{}.xlsx'.format(name)))
 
+
+import functools
+def ocrDir(dir, excelFileName):
+
+    names = os.listdir(dir)
+    reg = re.compile(r'image(\d+)\.')
+    def cmp(e1, e2):
+        index1 = reg.search(e1).group(1)
+        index2 = reg.search(e2).group(1)
+        return int(index1) - int(index2)
+    names.sort(key = functools.cmp_to_key(cmp))
+
+    r = []
+    for j in range(len(names)):
+        fileName = names[j]
+        fullPath = Tools.joinPath(dir, fileName)
+        fragDir = Tools.joinPath(cacheDir, 'tmp')
+        Tools.createDir(fragDir)
+        childFragDir = Tools.joinPath(fragDir, str(j))
+        Tools.createDir(childFragDir)
+        ocr = OCRTools(childFragDir)
+        try:
+            tr = ocr.ocr(fullPath)
+        except Exception as e:
+            tr = ocr.getEmptyData()
+            Log.e(str(e))
+        r += tr
+    
+    excelPath = Tools.joinPath(Tools.joinPath(cacheDir, 'tmp'), excelFileName)
+    OfficeTools.writeIntoExcel(r, excelPath)
+    shutil.copyfile(excelPath, Tools.joinPath(excelDir, excelFileName))
+
+
+ocrDir('../sidamen', '四大门村股东清册.xlsx')
 
 def doJobs(name, tindex):
     docxCount = len(docxFiles)
